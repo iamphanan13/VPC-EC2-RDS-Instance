@@ -22,32 +22,6 @@ resource "aws_internet_gateway" "vpc_igw" {
   }
 }
 
-# Create a group of public subnets based on variable subnet_count.public
-resource "aws_subnet" "public_subnet" {
-  // Count the number of resource want to create
-
-  count = var.subnet_count.public
-
-  // Set public subnet into VPC
-  vpc_id = aws_vpc.vpc.id
-
-  // Grabbing CIDR Block from the "public_subnets" variable, and grab element from the list based on count
-  // When it count to 1, it will grab the first element from CIDR Block
-  // It'll be 10.10.1.0/24
-
-  cidr_block = var.public_subnets[count.index]
-
-  // Grabbing avability zones from data object which created before, and grab element from the list based on count
-  // When it count to 1, and my region is ap-southeast-1 and it'll grab ap-southeast-1a
-  
-  availability_zone = data.aws_availability_zones.available.names[count.index]
-
-  // Adding tags to the public subnets and suffixed with the count
-  tags = {
-    Name = "Public_Subnet_${count.index}"
-  }
-}
-
 # Create a group of private subnets based on variable subnet_count.private
 resource "aws_subnet" "private_subnet" {
   // Count the number of resource want to create
@@ -75,6 +49,32 @@ resource "aws_subnet" "private_subnet" {
   }
 }
 
+# Create a group of public subnets based on variable subnet_count.public
+resource "aws_subnet" "public_subnet" {
+  // Count the number of resource want to create
+
+  count = var.subnet_count.public
+
+  // Set public subnet into VPC
+  vpc_id = aws_vpc.vpc.id
+
+  // Grabbing CIDR Block from the "public_subnets" variable, and grab element from the list based on count
+  // When it count to 1, it will grab the first element from CIDR Block
+  // It'll be 10.10.1.0/24
+
+  cidr_block = var.public_subnets[count.index]
+
+  // Grabbing avability zones from data object which created before, and grab element from the list based on count
+  // When it count to 1, and my region is ap-southeast-1 and it'll grab ap-southeast-1a
+  
+  availability_zone = data.aws_availability_zones.available.names[count.index]
+
+  // Adding tags to the public subnets and suffixed with the count
+  tags = {
+    Name = "Public_Subnet_${count.index}"
+  }
+}
+
 
 resource "aws_route_table" "public_route_table" {
   // Put Public Route Table into my VPC 
@@ -84,7 +84,7 @@ resource "aws_route_table" "public_route_table" {
   // and adding GW "vpc_igw"
   route {
     cidr_block = "0.0.0.0/0"
-    gateway_id = aws_internet_gateway.vpc_igw
+    gateway_id = aws_internet_gateway.vpc_igw.id
   }
 }
 
@@ -174,5 +174,45 @@ resource "aws_db_subnet_group" "db_sg" {
   // add them to this db subnet group
 
   subnet_ids = [for subnet in aws_subnet.private_subnet : subnet.id]
+}
+
+# Create RDS instance
+resource "aws_db_instance" "database" {
+  allocated_storage = var.settings.database.allocated_storage
+  engine = var.settings.database.engine
+  engine_version = var.settings.database.engine_version
+  instance_class = var.settings.database.instance_class
+  db_name = var.settings.database.db_name
+  username = var.db_username
+  password = var.db_password
+  db_subnet_group_name = aws_db_subnet_group.db_sg.id
+  vpc_security_group_ids = [aws_security_group.db_sg.id]
+  skip_final_snapshot = var.settings.database.skip_final_snapshot
+  
+}
+
+# Create EC2 instance
+resource "aws_instance" "vm" {
+  count = var.settings.app.count
+  ami = data.aws_ami.ubuntu.id
+  instance_type = var.settings.app.instance_type
+  subnet_id = aws_subnet.public_subnet[count.index].id
+  key_name = aws_key_pair.keypair.key_name
+  vpc_security_group_ids = [aws_security_group.web_sg.id]
+
+  tags = {
+    Name = "Web_VM_${count.index}"
+  }
+}
+
+# Create Elastic IP 
+resource "aws_eip" "eip" {
+  count = var.settings.app.count
+
+  instance = aws_instance.vm[count.index].id
+  vpc = true
+  tags = {
+    Name = "VM_eip_${count.index}"
+  }
 }
 

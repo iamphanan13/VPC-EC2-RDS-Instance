@@ -27,19 +27,24 @@ variable "subnet_count" {
 
 # Configuration settins for the EC2 and RDS instances
 
-variable "ec2_configuration" {
+variable "settings" {
   description = "Configuration EC2 and RDS"
   type = map(any)
+  # type = map(object({
+  #   database = map(object({
+  #     instance_class = string
+  #   }))
+  # }))
   default = {
     "database" = {
         allocated_storage = 10 // Disk size 
         engine = "mysql" // Database engine
         engine_version = "8.0.27" // Database version
-        instances_class = "db.t3.micro"
+        instance_class = "db.t3.micro"
         db_name = "RDS_DB"
         skip_final_snapshot = true
     },
-    "web_app" = {
+    "app" = {
         count = 1 
         instance_type = "t3.micro"
     }
