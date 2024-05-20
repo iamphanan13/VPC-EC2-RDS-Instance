@@ -16,3 +16,11 @@
 # Ignore CLI configuration files
 .terraformrc
 terraform.rc
+
+# Ignore pub key
+*.pub
+*.pem
+
+# .tfstate files 
+*.tfstate
+*.tfstate.*
