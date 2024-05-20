@@ -1,4 +1,4 @@
-# Project Name
+# Create custom VPC with EC2 and RDS Instance using Terraform
 
 ## Overview
 
