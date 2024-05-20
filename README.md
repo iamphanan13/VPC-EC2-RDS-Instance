@@ -12,6 +12,10 @@ This project aims to provision and manage EC2 instances and RDS databases using 
 - Network setup and security group management
 - Scalability and high availability considerations
 
+## Architectures
+
+![Create custom VPC with EC2 and RDS Instance using Terraform.](images/architecture.webp)
+
 ## Prerequisites
 
 Before getting started, make sure you have the following:
@@ -24,12 +28,31 @@ Before getting started, make sure you have the following:
 
 To get started with this project, follow these steps:
 
-1. Clone the repository to your local machine.
+1. Clone this repository:
+```
+git clone https://github.com/iamphanan13/VPC-EC2-RDS-Instance.git`
+```
+
 2. Configure your AWS credentials.
-3. Update the Terraform variables in the configuration files as needed.
+```
+export AWS_ACCESS_KEY_ID=<Your AWS Acess ID>
+export AWS_SECRET_ACCESS_KEY=<your AWS Secret Acess Key>
+```
+3. Update your value in `variables/secrets.tfvars`
+
+```
+db_username = "username" // Add your username
+db_password = "Password123!" // Add your password
+
+my_ip = "xxx.xxx.xx.x" // Update your IP Address
+```
+
+4. Update the Terraform variables in the configuration files as needed.
 4. Run `terraform init` to initialize the project.
-5. Run `terraform plan` to see the planned changes.
-6. Run `terraform apply` to provision the infrastructure.
+5. Run `
+terraform plan --var-file="variables/secrets.tfvars" ` to see the planned changes.
+
+6. Run `terraform apply --var-file="variables/secrets.tfvars"` to provision the infrastructure.
 7. Verify that the EC2 instances and RDS databases are successfully created.
 8. Use the resources as required.
 
