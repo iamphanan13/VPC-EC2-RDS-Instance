@@ -54,7 +54,29 @@ terraform plan --var-file="variables/secrets.tfvars" ` to see the planned change
 
 6. Run `terraform apply --var-file="variables/secrets.tfvars"` to provision the infrastructure.
 7. Verify that the EC2 instances and RDS databases are successfully created.
-8. Use the resources as required.
+
+8. Change permission of private key
+```
+chmod 400 ec2_kp.pem
+```
+9. Let's connect to EC2 Instance, if they asked something, please type `yes`.
+```
+ssh -o 'IdentitiesOnly yes' -i "ec2_kp.pem" ubuntu@$(terraform output -raw public_dns)
+```
+
+10. Updated Ubuntu packages and install mysql client
+```
+sudo apt-get update -y && sudo apt install mysql-client -y
+```
+
+11. Let's connect to `MySQL`
+```
+mysql -h <database-endpoint> -P <database-port> -u <db-username> -p <db-password>
+```
+
+12. Enjoy
+
+**Reminder**: After you have done everything, please run `terraform destroy --auto-approve`.
 
 ## Contributing
 
