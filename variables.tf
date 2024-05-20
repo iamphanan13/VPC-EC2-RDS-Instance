@@ -39,7 +39,7 @@ variable "settings" {
     "database" = {
         allocated_storage = 10 // Disk size 
         engine = "mysql" // Database engine
-        engine_version = "8.0.27" // Database version
+        engine_version = "8.0.35" // Database version
         instance_class = "db.t3.micro"
         db_name = "RDS_DB"
         skip_final_snapshot = true
